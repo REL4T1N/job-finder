@@ -257,3 +257,12 @@ go.work.sum
 # .idea/
 # .vscode/
 # <<< ignoreinit: Go
+
+
+# <<< dirs
+data/info
+data/logs
+data/organizations
+data/promts
+data/resume
+data/templates
