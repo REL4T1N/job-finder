@@ -1,0 +1,61 @@
+services:
+  # Database Service (PostgreSQL 16 Alpine)
+  db:
+    image: postgres:16-alpine
+    container_name: job-finder-db
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    ports:
+      - "${DB_PORT}:5432"
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+    networks:
+      - job-finder-network
+    restart: unless-stopped
+
+  # Message Broker (Official Apache Kafka in KRaft mode)
+  kafka:
+    image: apache/kafka:3.7.0
+    container_name: job-finder-kafka
+    ports:
+      - "${KAFKA_PORT_EXTERNAL}:9094"
+    environment:
+      # Настройки KRaft режима (официальный синтаксис)
+      - KAFKA_NODE_ID=1
+      - KAFKA_PROCESS_ROLES=broker,controller
+      - KAFKA_CONTROLLER_QUORUM_VOTERS=1@kafka:9093
+      - KAFKA_CONTROLLER_LISTENER_NAMES=CONTROLLER
+      
+      # Протоколы и слушатели
+      - KAFKA_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093,EXTERNAL://:9094
+      - KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,EXTERNAL:PLAINTEXT
+      
+      # Маршрутизация трафика
+      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092,EXTERNAL://localhost:9094
+    volumes:
+      - ./data/kafka:/var/lib/kafka/data
+    networks:
+      - job-finder-network
+    restart: unless-stopped
+
+
+  # Web UI for Kafka monitoring
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: job-finder-kafka-ui
+    ports:
+      - "${KAFKA_UI_PORT}:8080"
+    environment:
+      - KAFKA_CLUSTERS_0_NAME=local-kraft-cluster
+      - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka:9092
+    depends_on:
+      - kafka
+    networks:
+      - job-finder-network
+    restart: unless-stopped
+
+networks:
+  job-finder-network:
+    driver: bridge
