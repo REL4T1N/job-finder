@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package parser;
+
+option go_package = "job-finder/proto/parser;parserpb";
+
+enum Company {
+    COMPANY_UNSPECIFIED = 0;
+    COMPANY_VK = 1;
+    COMPANY_YANDEX = 2;
+}
+
+service VacancyParser {
+    rpc StartParsing (ParseRequest) returns (ParseResponse);
+}
+
+message ParseRequest {
+    Company company = 1;
+    string direction = 2;
+}
+
+message ParseResponse {
+    bool success = 1;
+    int32 count = 2;
+    optional string error_message = 3; // Support None/nil
+}
