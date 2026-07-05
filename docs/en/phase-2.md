@@ -34,8 +34,8 @@
 
 
 ## 2.5. Kafka Message Format (JSON Schema)
-- [ ] Design the message structure that the Python parser will send to Kafka.
-- [ ] Document the format of the JSON message.
+- [x] Design the message structure that the Python parser will send to Kafka.
+- [x] Document the format of the JSON message.
 
 --- 
 
